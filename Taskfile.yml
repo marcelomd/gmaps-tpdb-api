@@ -1,0 +1,28 @@
+# https://taskfile.dev
+
+version: '3'
+
+tasks:
+  tidy:
+    cmds:
+      - go mod tidy
+
+  build:
+    deps:
+      - tidy
+    cmds:
+      - go build -o api ./cmd/api
+
+  run:
+    deps:
+      - build
+    cmds:
+      - ./api
+
+  test:
+    deps:
+      - build
+    cmds:
+      - go test ./...
+
+
