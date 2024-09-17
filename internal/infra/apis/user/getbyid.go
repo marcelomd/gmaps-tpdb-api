@@ -1,48 +1,49 @@
 package user
 
 import (
-	"log/slog"
-	"net/http"
+    "log/slog"
+    "net/http"
 
-	"github.com/gin-gonic/gin"
+    "github.com/gin-gonic/gin"
 
-	"fragments/internal/core/models"
+    "fragments/internal/core/models"
+    "fragments/internal/infra/httpserver"
 )
 
 type GetByIdOutput struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Role  string `json:"role"`
-	Email string `json:"email"`
+    Id    string `json:"id"`
+    Name  string `json:"name"`
+    Role  string `json:"role"`
+    Email string `json:"email"`
 }
 
 func (a UserApi) handleGetById(c *gin.Context) {
-	authFromCtx, exists := c.Get("userAuth")
-	if !exists {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid"})
-		return
-	}
+    authFromCtx, exists := c.Get("userAuth")
+    if !exists {
+        httpserver.HandleError(c, http.StatusBadRequest, "bad request", nil)
+        return
+    }
 
-	auth := authFromCtx.(models.AuthData)
-	slog.Info("auth data", slog.Any("auth", auth))
+    auth := authFromCtx.(models.AuthData)
+    slog.Info("auth data", slog.Any("auth", auth))
 
-	id := c.Param("id")
-	if id == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "invalid"})
-		return
-	}
+    id := c.Param("id")
+    if id == "" {
+        httpserver.HandleError(c, http.StatusBadRequest, "bad request", nil)
+        return
+    }
 
-	result, err := a.userService.GetById(c.Request.Context(), id)
-	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
+    result, err := a.userService.GetById(c.Request.Context(), id)
+    if err != nil {
+        httpserver.HandleError(c, http.StatusBadRequest, "bad request", err)
+        return
+    }
 
-	output := GetByIdOutput{
-		Id:    result.Id,
-		Name:  result.Name,
-		Email: result.Email,
-		Role:  result.Role,
-	}
-	c.JSON(http.StatusOK, output)
+    output := GetByIdOutput{
+        Id:    result.Id,
+        Name:  result.Name,
+        Email: result.Email,
+        Role:  result.Role,
+    }
+    c.JSON(http.StatusOK, output)
 }

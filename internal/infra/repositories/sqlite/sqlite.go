@@ -1,11 +1,11 @@
 package sqlite
 
 import (
-	"database/sql"
+    "database/sql"
 
-	"github.com/uptrace/bun/driver/sqliteshim"
+    "github.com/uptrace/bun/driver/sqliteshim"
 )
 
-func NewSqliteConnection(source string) (*sql.DB, error) {
-	return sql.Open(sqliteshim.ShimName, source)
+func NewConnection(source string) (*sql.DB, error) {
+    return sql.Open(sqliteshim.ShimName, source)
 }
