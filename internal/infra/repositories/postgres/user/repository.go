@@ -10,21 +10,21 @@ import (
     "fragments/internal/core/models"
 )
 
-type UserRepository struct {
+type Repository struct {
     pg *pgxpool.Pool
 }
 
-func NewUserRepository(pg *pgxpool.Pool) *UserRepository {
-    return &UserRepository{pg: pg}
+func New(pg *pgxpool.Pool) *Repository {
+    return &Repository{pg: pg}
 }
 
-func (r UserRepository) Init() error {
+func (r Repository) Init() error {
     ctx := context.Background()
     query := ` CREATE TABLE users (
         id           text  unique not null,
         name         text  not null,
         email        text  not null,
-        role         text  not null,
+        role         int   not null,
         passwordhash bytea not null
     )`
     _, err := r.pg.Exec(ctx, query)
@@ -34,7 +34,7 @@ func (r UserRepository) Init() error {
     return nil
 }
 
-func (r UserRepository) Drop() error {
+func (r Repository) Drop() error {
     ctx := context.Background()
     query := ` DROP TABLE users`
     _, err := r.pg.Exec(ctx, query)
@@ -44,7 +44,7 @@ func (r UserRepository) Drop() error {
     return nil
 }
 
-func (r UserRepository) Reset() error {
+func (r Repository) Reset() error {
     err := r.Drop()
     if err != nil {
         return err
@@ -52,7 +52,7 @@ func (r UserRepository) Reset() error {
     return r.Init()
 }
 
-func (r UserRepository) Create(ctx context.Context, nu models.User) (models.User, error) {
+func (r Repository) Create(ctx context.Context, nu models.User) (models.User, error) {
     query := `INSERT INTO users (id, name, email, role, passwordhash) VALUES (@id, @name, @email, @role, @passwordhash)`
     args := pgx.NamedArgs{
         "id":           nu.Id,
@@ -68,7 +68,7 @@ func (r UserRepository) Create(ctx context.Context, nu models.User) (models.User
     return nu, nil
 }
 
-func (r UserRepository) GetById(ctx context.Context, id string) (models.User, error) {
+func (r Repository) GetById(ctx context.Context, id string) (models.User, error) {
     query := `SELECT id, name, email, role, passwordhash FROM users WHERE id = @id`
     args := pgx.NamedArgs{"id": id}
     row := r.pg.QueryRow(ctx, query, args)
@@ -84,7 +84,7 @@ func (r UserRepository) GetById(ctx context.Context, id string) (models.User, er
     }
 }
 
-func (r UserRepository) GetByEmail(ctx context.Context, email string) (models.User, error) {
+func (r Repository) GetByEmail(ctx context.Context, email string) (models.User, error) {
     query := `SELECT id, name, email, role, passwordhash FROM users WHERE email = @email`
     args := pgx.NamedArgs{"email": email}
     row := r.pg.QueryRow(ctx, query, args)

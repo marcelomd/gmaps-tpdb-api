@@ -25,7 +25,8 @@ func setDefaults() {
     viper.SetDefault("HOST", "0.0.0.0")
     viper.SetDefault("PORT", "8080")
     viper.SetDefault("SECRET", "secret")
-    viper.SetDefault("DATABASE_URL", "host=0.0.0.0 user=postgres password=postgres dbname=postgres sslmode=disable")
+    //viper.SetDefault("DATABASE_URL", "host=0.0.0.0 user=postgres password=postgres dbname=postgres sslmode=disable")
+    viper.SetDefault("DATABASE_URL", "postgres://postgres:postgres@0.0.0.0:5432/postgres?sslmode=disable")
 }
 
 func makeConfig() Config {

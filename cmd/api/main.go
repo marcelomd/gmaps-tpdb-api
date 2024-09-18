@@ -26,19 +26,23 @@ func main() {
     if err != nil {
         panic(err)
     }
+    err = postgres.RunMigrations(cfg.PGUrl)
+    if err != nil {
+        panic(err)
+    }
 
-    userRepo := repositories_user.NewUserRepository(pg)
+    userRepo := repositories_user.New(pg)
     _ = userRepo.Init()
 
     // ----- Services
-    userSvc := services_user.NewUserService(userRepo)
+    userSvc := services_user.New(userRepo)
 
     // ----- Controllers
-    authApi := api_auth.NewAuthApi(cfg.Secret, userSvc)
-    userApi := api_user.NewUserApi(userSvc)
+    authApi := api_auth.New(cfg.Secret, userSvc)
+    userApi := api_user.New(userSvc)
 
-    // ----- Go
-    server := httpserver.NewServer(cfg.Address, authApi.AuthMiddleware, authApi.RoleMiddleware)
+    // ----- Go!
+    server := httpserver.New(cfg.Address, authApi.AuthMiddleware, authApi.RoleMiddleware)
     _ = authApi.Register("/", server)
     _ = userApi.Register("/user", server)
 

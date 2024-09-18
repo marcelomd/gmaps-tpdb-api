@@ -30,7 +30,7 @@ func (a UserApi) handleGetMe(c *gin.Context) {
         Id:    result.Id,
         Name:  result.Name,
         Email: result.Email,
-        Role:  result.Role,
+        Role:  result.Role.String(),
     }
     c.JSON(http.StatusOK, output)
 }

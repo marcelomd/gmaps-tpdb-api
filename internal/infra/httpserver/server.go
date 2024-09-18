@@ -2,6 +2,7 @@ package httpserver
 
 import (
     "context"
+    "fragments/internal/core/models"
     "log"
     "log/slog"
     "net/http"
@@ -17,10 +18,13 @@ type Server struct {
     address     string
     Router      *gin.Engine
     requireAuth func(c *gin.Context)
-    requireRole func(c *gin.Context, role string)
+    requireRole func(c *gin.Context, role models.Role)
 }
 
-func NewServer(address string, requireAuth func(c *gin.Context), requireRole func(c *gin.Context, role string)) *Server {
+type authRequirer func(c *gin.Context)
+type roleRequirer func(c *gin.Context, role models.Role)
+
+func New(address string, requireAuth authRequirer, requireRole roleRequirer) *Server {
     r := gin.New()
     r.Use(gin.Recovery())
     r.Use(helmet.Default())
@@ -37,7 +41,7 @@ func (s Server) RequireAuth() gin.HandlerFunc {
     }
 }
 
-func (s Server) RequireRole(role string) gin.HandlerFunc {
+func (s Server) RequireRole(role models.Role) gin.HandlerFunc {
     return func(c *gin.Context) {
         s.requireRole(c, role)
     }

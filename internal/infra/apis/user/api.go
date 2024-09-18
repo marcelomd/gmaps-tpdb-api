@@ -1,6 +1,7 @@
 package user
 
 import (
+    "fragments/internal/core/models"
     "github.com/gin-gonic/gin"
 
     "fragments/internal/core/interfaces"
@@ -11,7 +12,7 @@ type UserApi struct {
     userService interfaces.UserService
 }
 
-func NewUserApi(userService interfaces.UserService) *UserApi {
+func New(userService interfaces.UserService) *UserApi {
     return &UserApi{userService: userService}
 }
 
@@ -20,8 +21,9 @@ func (a UserApi) Register(prefix string, server *httpserver.Server, middlewares 
     for _, mw := range middlewares {
         rg.Use(mw)
     }
-    rg.POST("/", a.handleCreate)
+    rg.POST("/register", a.handleRegister)
     rg.GET("/me", server.RequireAuth(), a.handleGetMe)
-    rg.GET("/:id", server.RequireAuth(), server.RequireRole("staff"), a.handleGetById)
+    rg.POST("/", server.RequireAuth(), server.RequireRole(models.AdminRole), a.handleCreate)
+    rg.GET("/:id", server.RequireAuth(), server.RequireRole(models.AdminRole), a.handleGetById)
     return nil
 }
